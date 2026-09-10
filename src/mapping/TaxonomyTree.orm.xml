@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Mapping for CoolMS\Taxonomy\Entity\TaxonomyTree.
+
+    XML, not attributes: the domain must not import the ORM.
+
+    !! `id`, `label`, `createdAt`, `updatedAt` and `accessedAt` are deliberately
+    absent - they come from IdentifierProviderTrait, LabelProviderTrait and
+    TimestampableTrait via TraitMappingDriver. See the sibling node mapping for
+    what re-declaring one costs.
+
+    `nodes` names the INTERFACE because the attribute did, and
+    resolve_target_entities rewrites it. Preserved verbatim rather than
+    "corrected" to the concrete class.
+-->
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="CoolMS\Taxonomy\Entity\TaxonomyTree"
+            table="coolms_taxonomy_trees">
+
+        <indexes>
+            <index name="idx_taxonomy_trees_code" columns="code"/>
+        </indexes>
+
+        <!-- The machine-readable handle every caller looks a tree up by, and the
+             reason the index above exists. Unique at the database because
+             find-or-create by code is the only way trees are obtained. -->
+        <field name="code" column="code" type="string" length="128" unique="true"/>
+
+        <one-to-many field="nodes"
+                     target-entity="CoolMS\Taxonomy\Entity\TaxonomyNodeInterface"
+                     mapped-by="tree"/>
+
+    </entity>
+
+</doctrine-mapping>

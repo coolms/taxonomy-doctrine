@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Mapping for CoolMS\Taxonomy\Entity\TaxonomyNode.
+
+    XML, not attributes: the domain must not import the ORM. Same rule
+    coolms/field-doctrine follows, and the reason this package exists at all.
+
+    !! THIS FILE DECLARES THE ENTITY'S OWN COLUMNS AND NOTHING ELSE. `id`,
+    `label`, `createdAt`, `updatedAt` and `accessedAt` are deliberately absent:
+    they arrive from IdentifierProviderTrait, LabelProviderTrait and
+    TimestampableTrait, whose CoolMS\Core\Mapping attributes TraitMappingDriver
+    translates earlier in the driver chain. The trait is their single source of
+    truth, and repeating one here makes it a two-source field - which is how a
+    trait-level change becomes a silent per-entity divergence. In the field
+    package that mistake dropped a column default and surfaced as one line of
+    schema drift.
+
+    Written against the RESOLVED metadata rather than transcribed from the class,
+    because the class does not show the trait-contributed columns at all and a
+    field the driver never sees is simply not mapped - nothing reports it.
+
+    !! THE TARGETS ARE INTERFACES, PRESERVED VERBATIM. The attributes named
+    TaxonomyNodeInterface and TaxonomyTreeInterface and the container's
+    resolve_target_entities rewrites them to the concrete classes. Naming the
+    concrete classes here would be a behaviour change wearing the clothes of a
+    format conversion.
+
+    !! THE DISCRIMINATOR MAP NAMES ONLY THIS CLASS, AND STAYS THAT WAY. A
+    subclass registers ITSELF, through #[DiscriminatorValue] on the child and
+    CoolMS\Entity\Doctrine\Event\DiscriminatorValueSubscriber at
+    loadClassMetadata. The parent must never learn about a child: this package is
+    published, and a published package cannot name an application class - a
+    consumer installing it alone would fatal on the map. Completing this map is
+    the edit that looks like a fix and breaks publication.
+-->
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                                      https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="CoolMS\Taxonomy\Entity\TaxonomyNode"
+            table="coolms_taxonomy_nodes"
+            inheritance-type="JOINED">
+
+        <discriminator-column name="type" type="string" length="64"/>
+
+        <discriminator-map>
+            <discriminator-mapping value="taxonomy_node" class="CoolMS\Taxonomy\Entity\TaxonomyNode"/>
+        </discriminator-map>
+
+        <indexes>
+            <index name="idx_taxonomy_nodes_slug" columns="slug"/>
+            <!-- The nested-set read path: every subtree query filters on the tree
+                 and ranges over lft/rgt, so the three travel together. -->
+            <index name="idx_taxonomy_nodes_nested_set" columns="tree_id,lft,rgt"/>
+            <index name="idx_taxonomy_nodes_parent" columns="parent_id"/>
+        </indexes>
+
+        <field name="slug" column="slug" type="string" length="128" unique="true"/>
+
+        <!-- Nested set bounds and depth. Maintained by the tree service, not by
+             the caller; they are columns rather than derived because the subtree
+             queries are range scans over them. -->
+        <field name="lft" column="lft" type="integer"/>
+        <field name="rgt" column="rgt" type="integer"/>
+        <field name="level" column="level" type="integer"/>
+
+        <!-- Tree ownership. RESTRICT rather than CASCADE: deleting a tree that
+             still holds nodes is a mistake worth refusing at the database. -->
+        <many-to-one field="tree"
+                     target-entity="CoolMS\Taxonomy\Entity\TaxonomyTreeInterface"
+                     inversed-by="nodes">
+            <join-column name="tree_id" referenced-column-name="id" nullable="false" on-delete="RESTRICT"/>
+        </many-to-one>
+
+        <!-- SET NULL, not CASCADE: orphaning a subtree is recoverable, deleting
+             it silently is not. -->
+        <many-to-one field="parent"
+                     target-entity="CoolMS\Taxonomy\Entity\TaxonomyNodeInterface"
+                     inversed-by="children">
+            <join-column name="parent_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+        </many-to-one>
+
+        <one-to-many field="children"
+                     target-entity="CoolMS\Taxonomy\Entity\TaxonomyNodeInterface"
+                     mapped-by="parent"/>
+
+        <lifecycle-callbacks>
+            <lifecycle-callback type="postLoad" method="onPostLoad"/>
+            <lifecycle-callback type="preUpdate" method="onPreUpdate"/>
+        </lifecycle-callbacks>
+
+    </entity>
+
+</doctrine-mapping>
