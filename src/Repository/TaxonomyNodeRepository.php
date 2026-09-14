@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace CoolMS\Taxonomy\Doctrine\Repository;
 
+use CoolMS\Core\Doctrine\Repository\DoctrineRepository;
+use CoolMS\Rql\Doctrine\DoctrineRqlVisitor;
 use CoolMS\Taxonomy\Entity\TaxonomyNode;
 use CoolMS\Taxonomy\Entity\TaxonomyNodeInterface;
 use CoolMS\Taxonomy\Entity\TaxonomyTreeInterface;
 use CoolMS\Taxonomy\Repository\TaxonomyNodeRepositoryInterface;
-use CoolMS\Core\Doctrine\Repository\DoctrineRepository;
-use CoolMS\Rql\Doctrine\DoctrineRqlVisitor;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
