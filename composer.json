@@ -3,6 +3,10 @@
     "description": "Doctrine mapping for the taxonomy entities, kept out of the domain.",
     "type": "library",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/coolms/taxonomy-doctrine/issues",
+        "source": "https://github.com/coolms/taxonomy-doctrine"
+    },
     "require": {
         "coolms/core": "^2.0",
         "coolms/core-doctrine": "^2.0",
