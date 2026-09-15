@@ -15,10 +15,21 @@
         "php": "^8.5",
         "symfony/dependency-injection": "^8.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^12.5"
+    },
     "autoload": {
         "psr-4": {
             "CoolMS\\Taxonomy\\Doctrine\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CoolMS\\Taxonomy\\Doctrine\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "extra": {
         "branch-alias": {
