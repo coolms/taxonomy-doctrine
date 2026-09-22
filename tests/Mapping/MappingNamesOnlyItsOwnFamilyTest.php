@@ -38,6 +38,7 @@ use function str_starts_with;
 final class MappingNamesOnlyItsOwnFamilyTest extends TestCase
 {
     private const string FAMILY = 'CoolMS\\Taxonomy\\';
+
     private const string XML_NS = 'http://doctrine-project.org/schemas/orm/doctrine-mapping';
 
     /** @return iterable<string, array{string}> */
